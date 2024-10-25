@@ -48,7 +48,7 @@ export class Tab1Page {
         if (this.rotationAngle === 45 || this.rotationAngle === -45) {
           this.playSound();
         }
-      }, (this.tempoTime * 1000) / 2);
+      }, (this.tempoTime * 1000) / 3);
     }, this.tempoTime * 1000);
   }
 
