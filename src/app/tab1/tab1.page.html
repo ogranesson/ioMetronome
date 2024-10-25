@@ -13,31 +13,36 @@
     </ion-toolbar>
   </ion-header>
 
-  <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-  width="100%" height="100%" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve">
-  <style type="text/css">
-    .st0{fill:#F95428;}
-    .st1{fill:#808080;}
-    .st2{fill:#F7B239;}
-    .st3{fill:#4D4D4D;}
-    .st4{fill:#CC582F;}
-  </style>
-  <polygon class="st0" points="132.8,19.6 98.7,27.2 67.3,19.6 100,0 "/>
-  <polygon class="st1" points="148.4,105.8 132.8,19.6 67.3,19.6 45.1,142.1 89.7,142.1 110.4,142.1 112.2,142.1 154.9,142.1 "/>
-  <g>
-    <rect x="89.7" y="36.4" class="st2" width="10.3" height="105.6"/>
-    <rect x="100" y="36.4" class="st2" width="10.3" height="105.6"/>
-  </g>
-  <rect x="97.7" y="36.4" class="st3" width="4.7" height="105.6"/>
-  <g>
+  <svg version="1.1" id="metronome" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+  width="300" height="300" viewBox="0 0 200 200" style="enable-background:new 0 0 200 200;" xml:space="preserve">
+    <style type="text/css">
+      .st0{fill:#F95428;}
+      .st1{fill:#808080;}
+      .st2{fill:#F7B239;}
+      .st3{fill:#4D4D4D;}
+      .st4{fill:#CC582F;}
+    </style>
+    <polygon class="st0" points="132.8,19.6 98.7,27.2 67.3,19.6 100,0 "/>
+    <polygon class="st1" points="148.4,105.8 132.8,19.6 67.3,19.6 45.1,142.1 89.7,142.1 110.4,142.1 112.2,142.1 154.9,142.1 "/>
     <g>
-      <polygon class="st3" points="103.5,53 103.5,56.5 103.5,149.5 96.5,149.5 96.5,56.5 96.5,53 		"/>
-      <path class="st0" d="M100,149.5"/>
-      <rect x="96.5" y="15.9" class="st3" width="7" height="28.3"/>
+      <rect x="89.7" y="36.4" class="st2" width="10.3" height="105.6"/>
+      <rect x="100" y="36.4" class="st2" width="10.3" height="105.6"/>
     </g>
-    <polygon class="st4" points="111.5,40.7 109.4,56.5 100,56.5 90.7,56.5 88.6,40.7 100,40.7 	"/>
-  </g>
-  <polygon class="st0" points="154.9,142.1 165.4,200 34.6,200 45.1,142.1 "/>
+    <rect x="97.7" y="36.4" class="st3" width="4.7" height="105.6"/>
+    <g>
+      <g>
+        <polygon class="st3" points="96.5,53.2 103.5,53.2 103.5,149.7 100,149.7 96.5,149.7"
+          [attr.transform]="'rotate(' + rotationAngle + ' 100 149.7)'"
+          [style.transition]="'transform ' + tempoTime + 's cubic-bezier(0.42, 0, 0.58, 1)'"/>
+        <rect x="96.5" y="16.2" class="st3" width="7" height="28.3"
+          [attr.transform]="'rotate(' + rotationAngle + ' 100 149.7)'"
+          [style.transition]="'transform ' + tempoTime + 's cubic-bezier(0.42, 0, 0.58, 1)'"/>
+      </g>
+      <polygon class="st4" points="111.5,41 109.4,56.8 100,56.8 90.7,56.8 88.6,41 100,41"
+      [attr.transform]="'rotate(' + rotationAngle + ' 100 149.7)'"
+      [style.transition]="'transform ' + tempoTime + 's cubic-bezier(0.42, 0, 0.58, 1)'"/>
+    </g>
+    <polygon class="st0" points="154.9,142.1 165.4,200 34.6,200 45.1,142.1 "/>
   </svg>
   
 </ion-content>

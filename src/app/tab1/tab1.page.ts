@@ -10,5 +10,20 @@ import { ExploreContainerComponent } from '../explore-container/explore-containe
   imports: [IonHeader, IonToolbar, IonTitle, IonContent, ExploreContainerComponent],
 })
 export class Tab1Page {
+  rotationAngle: number = -45;
+  tempo: number = 60;
+  tempoTime: number = 1;
+  interval!: ReturnType<typeof setInterval>; // because in Node, setInterval returns a Timeout object, while in the browser it returns a number
+
   constructor() {}
+
+  ngOnInit() {
+    this.interval = setInterval(() => {
+      if (this.rotationAngle === -45) {
+        this.rotationAngle = 45;
+      } else {
+        this.rotationAngle = -45;
+      }
+    }, this.tempoTime * 1000);
+  }
 }
