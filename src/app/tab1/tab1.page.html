@@ -55,7 +55,7 @@
     </text>
     <text transform="matrix(1 0 0 1 45.0986 182.0137)">
       <tspan x="16" dy="0" class="st9 st10" text-anchor="middle">Volume:</tspan>
-      <tspan x="16" dy="1.2em" class="st5 st10" text-anchor="middle">{{volume}}%</tspan>
+      <tspan x="16" dy="1.2em" class="st5 st10" text-anchor="middle">{{beatvolume}}%</tspan>
     </text>
     <text transform="matrix(1 0 0 1 124.1853 182.0137)">
       <tspan x="15" dy="0" class="st9 st10" text-anchor="middle">Beats:</tspan>
@@ -81,7 +81,7 @@
 
   <ion-item class="slider">
     <ion-label>Volume</ion-label>
-    <ion-range [(ngModel)]="volume" min="0" max="100">
+    <ion-range [(ngModel)]="beatvolume" min="0" max="100" (ionChange)="volume()">
       <ion-label slot="start">0</ion-label>
       <ion-label slot="end">100</ion-label>
     </ion-range>

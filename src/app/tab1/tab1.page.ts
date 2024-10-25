@@ -15,7 +15,7 @@ export class Tab1Page {
   tempo: number = 60;
   tempoTime: number = 1;
   interval!: ReturnType<typeof setInterval>; // because in Node, setInterval returns a Timeout object, while in the browser it returns a number
-  volume: number = 50;
+  beatvolume: number = 50;
   beats: number = 4;
 
   isPlaying: boolean = false;
@@ -68,5 +68,9 @@ export class Tab1Page {
       this.isPlaying = true;
       this.buttonText = "Pause";
     }
+  }
+
+  volume() {
+    this.audio.volume = this.beatvolume / 100;
   }
 }
