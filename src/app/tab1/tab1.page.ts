@@ -20,7 +20,7 @@ export class Tab1Page {
 
   isPlaying: boolean = false;
   audio = new Audio('assets/beat.mp3');
-  buttonText: string = "Pause";
+  buttonText: string = "Play";
 
   constructor() {}
 
@@ -30,7 +30,10 @@ export class Tab1Page {
 
   tempoChange() {
     this.tempoTime = 60/this.tempo;
-    this.metronome();
+
+    if (this.isPlaying) {
+      this.metronome();
+    }
   }
 
   metronome() {
