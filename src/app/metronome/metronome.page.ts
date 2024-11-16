@@ -7,6 +7,8 @@ import { AlertController } from '@ionic/angular';
 import { Preset } from '../models/preset.model';
 import { PresetService } from '../services/preset.service';
 import { Subscription } from 'rxjs';
+import { NativeAudio } from '@awesome-cordova-plugins/native-audio/ngx';
+
 
 @Component({
   selector: 'app-metronome',
@@ -14,6 +16,7 @@ import { Subscription } from 'rxjs';
   styleUrls: ['metronome.page.scss'],
   standalone: true,
   imports: [IonButton, IonList, IonItem, IonRange, IonHeader, IonToolbar, IonTitle, IonRange, IonLabel, IonContent, ExploreContainerComponent, FormsModule],
+  providers: [NativeAudio]
 })
 export class MetronomePage {
   rotationAngle: number = 0;
@@ -29,28 +32,31 @@ export class MetronomePage {
   audio = new Audio('assets/beat.mp3');
   buttonText: string = "Play";
 
-  constructor(private router: Router, private alertController: AlertController, private presetService: PresetService) {}
+  constructor(private router: Router, private alertController: AlertController, private presetService: PresetService, private nativeAudio: NativeAudio) {}
 
   ngOnInit() {
-    this.audio.load();
+    this.nativeAudio.preloadSimple('beat', 'assets/beat.mp3').then(() => {
+      console.log('Sound loaded!');
+    });
 
-    if(this.presetService.getPreset()) {
-      const preset = this.presetService.getPreset();
-
-      this.tempo = preset.tempo;
-      this.beatvolume = preset.beatvolume;
-      this.beats = preset.beats;
-      this.tempoTime = 60 / preset.tempo;
+    const preset = this.presetService.getPreset();
+    if (preset) {
+      this.presetService.selectPreset(preset); // Emit the preset for all subscribers
     }
 
+    // Subscribe to the selectedPreset subject and apply the preset
     this.presetSubscription = this.presetService.selectedPreset.subscribe((preset) => {
       if (preset) {
-        this.tempo = preset.tempo;
-        this.beatvolume = preset.beatvolume;
-        this.beats = preset.beats;
-        this.tempoTime = 60 / preset.tempo;
+        this.applyPreset(preset);
       }
     });
+  }
+
+  applyPreset(preset: Preset) {
+    this.tempo = preset.tempo;
+    this.beatvolume = preset.beatvolume;
+    this.beats = preset.beats;
+    this.tempoTime = 60 / preset.tempo;
   }
 
   ngOnDestroy() {
@@ -86,8 +92,7 @@ export class MetronomePage {
   }
 
   playSound() {
-    this.audio.currentTime = 0;
-    this.audio.play();
+    this.nativeAudio.play('beat');
   }
 
   pause() {
