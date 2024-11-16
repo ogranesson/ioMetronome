@@ -1,0 +1,19 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Presets</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <ion-item *ngFor="let preset of presets" (click)="selectPreset(preset)">
+      <ion-label>
+        <h2>{{ preset.name }}</h2>
+        <p>Tempo: {{ preset.tempo }} BPM, Volume: {{ preset.beatvolume }}, Beats: {{ preset.beats }}</p>
+      </ion-label>
+      <ion-button color="danger" (click)="deletePreset(preset.name); $event.stopPropagation();">
+        Delete
+      </ion-button>
+    </ion-item>
+  </ion-list> 
+</ion-content>
