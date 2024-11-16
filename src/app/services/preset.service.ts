@@ -15,7 +15,7 @@ export class PresetService {
   constructor(private file: File, private platformService: PlatformService) {}
 
   async loadPresets(): Promise<Preset[]> {
-    if (!this.platformService.isCordova) {
+    if (!this.platformService.isCordova()) {
       console.warn('Cordova is not available. Falling back to localStorage for presets.');
       const data = localStorage.getItem(this.fileName);
       return data ? JSON.parse(data) : [];
@@ -42,7 +42,7 @@ export class PresetService {
   }
 
   addPreset(newPreset: Preset): Observable<void> {
-    if (!this.platformService.isCordova) {
+    if (!this.platformService.isCordova()) {
       console.warn('Cordova is not available. Adding preset to localStorage.');
       const presets = JSON.parse(localStorage.getItem(this.fileName) || '[]') as Preset[];
       presets.push(newPreset);
@@ -59,7 +59,7 @@ export class PresetService {
   }
 
   savePresets(presets: Preset[]): Observable<void> {
-    if (!this.platformService.isCordova) {
+    if (!this.platformService.isCordova()) {
       console.warn('Cordova is not available. Saving presets to localStorage.');
       localStorage.setItem(this.fileName, JSON.stringify(presets));
       return from(Promise.resolve());
@@ -80,7 +80,7 @@ export class PresetService {
   }
 
   deletePreset(presetName: string): Observable<void> {
-    if (!this.platformService.isCordova) {
+    if (!this.platformService.isCordova()) {
       console.warn('Cordova is not available. Deleting preset from localStorage.');
       const presets = JSON.parse(localStorage.getItem(this.fileName) || '[]') as Preset[];
       const updatedPresets = presets.filter((p) => p.name !== presetName);

@@ -8,6 +8,7 @@ import { Preset } from '../models/preset.model';
 import { PresetService } from '../services/preset.service';
 import { Subscription } from 'rxjs';
 import { NativeAudio } from '@awesome-cordova-plugins/native-audio/ngx';
+import { PlatformService } from '../services/platform.service';
 
 
 @Component({
@@ -32,12 +33,23 @@ export class MetronomePage {
   audio = new Audio('assets/beat.mp3');
   buttonText: string = "Play";
 
-  constructor(private router: Router, private alertController: AlertController, private presetService: PresetService, private nativeAudio: NativeAudio) {}
+  constructor(private router: Router,
+              private alertController: AlertController,
+              private presetService: PresetService,
+              private nativeAudio: NativeAudio,
+              private platformService: PlatformService) {}
 
   ngOnInit() {
-    this.nativeAudio.preloadSimple('beat', 'assets/beat.mp3').then(() => {
+    if (this.platformService.isCordova()) {
+      this.nativeAudio.preloadSimple('beat', 'assets/beat.mp3').then(() => {
+        console.log('Sound loaded!');
+      });
+    }
+
+    if (this.platformService.isBrowser()) {
+      this.audio.load();
       console.log('Sound loaded!');
-    });
+    }
 
     const preset = this.presetService.getPreset();
     if (preset) {
@@ -92,7 +104,8 @@ export class MetronomePage {
   }
 
   playSound() {
-    this.nativeAudio.play('beat');
+    if (this.platformService.isBrowser()) { this.audio.currentTime = 0; this.audio.play(); }
+    if (this.platformService.isCordova()) { this.nativeAudio.play('beat'); }
   }
 
   pause() {
@@ -110,7 +123,13 @@ export class MetronomePage {
   }
 
   volume() {
-    this.audio.volume = this.beatvolume / 100;
+    if (this.platformService.isBrowser()) { this.audio.volume = this.beatvolume / 100; }
+    if (this.platformService.isCordova()) {
+      this.nativeAudio.setVolumeForComplexAsset('beat', this.beatvolume / 100).then(
+        () => console.log('Volume set successfully'),
+        (err) => console.error('Error setting volume:', err)
+      );
+    }
   }
 
   addPreset() {
