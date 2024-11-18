@@ -8,8 +8,7 @@ import {
   IonItem,
   IonList,
   IonLabel,
-  IonButton,
-} from '@ionic/angular/standalone';
+  IonButton, IonAlert } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { PresetService } from 'src/app/services/preset.service';
 import { AlertController, NavController } from '@ionic/angular';
@@ -20,7 +19,7 @@ import { Preset } from '../models/preset.model';
   templateUrl: './presets.page.html',
   styleUrls: ['./presets.page.scss'],
   standalone: true,
-  imports: [
+  imports: [IonAlert, 
     CommonModule,
     FormsModule,
     IonHeader,
@@ -35,11 +34,29 @@ import { Preset } from '../models/preset.model';
 })
 export class PresetsPage {
   presets: any[] = [];
+  isAlertVisible: boolean = false;
+  presetToDelete: string = "";
+
+  public alertButtons = [
+    {
+      text: 'Cancel',
+      role: 'cancel'
+    },
+    {
+      text: 'OK',
+      role: 'confirm',
+      handler: () => {
+        this.presetService.deletePreset(this.presetToDelete);
+        this.presets = this.presets.filter((p) => p.name !== this.presetToDelete);
+        this.isAlertVisible = false;
+      },
+    },
+  ];
 
   constructor(
     private presetService: PresetService,
-    private alertController: AlertController,
-    private navController: NavController
+    private navController: NavController,
+    private alertController: AlertController
   ) {}
 
   async ngOnInit() {
@@ -55,8 +72,33 @@ export class PresetsPage {
     this.navController.navigateForward('/tabs/metronome');
   }
 
-  deletePreset(presetName: string) {
-    this.presetService.deletePreset(presetName);
-    this.presets = this.presets.filter((p) => p.name !== presetName);
+  async deletePreset(presetName: string) {
+    const alert = await this.alertController.create({
+      header: 'Delete Preset',
+      message: `Are you sure you want to delete the preset "${presetName}"?`,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'OK',
+          role: 'confirm',
+          handler: () => {
+            this.presetService.deletePreset(presetName).subscribe({
+              next: () => {
+                this.presets = this.presets.filter((p) => p.name !== presetName);
+                console.log(`Preset "${presetName}" deleted successfully.`);
+              },
+              error: (err) => {
+                console.error(`Error deleting preset "${presetName}":`, err);
+              },
+            });
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
 }

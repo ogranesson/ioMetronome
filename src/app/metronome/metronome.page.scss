@@ -1,14 +1,12 @@
 @media (max-width: 768px) {
-  .my-component {
-    background-color: lightblue;
-    font-size: 14px;
+  .slider {
+    width: 100%;
   }
 }
 
-/* Define styles for larger screens (browsers) */
+// browser
 @media (min-width: 769px) {
-  .my-component {
-    background-color: lightgreen;
-    font-size: 18px;
+  .slider {
+    width: 50%;
   }
 }

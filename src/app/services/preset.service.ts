@@ -16,7 +16,11 @@ export class PresetService {
   constructor(private platformService: PlatformService) {}
 
   async loadPresets(): Promise<Preset[]> {
-    const defaultPresets: Preset[] = [{ name: 'Default', tempo: 120, beatvolume: 100, beats: 4 }];
+    const defaultPresets: Preset[] = [
+      { name: 'Default', tempo: 120, beatvolume: 100, beats: 4 },
+      { name: 'Refault', tempo: 80, beatvolume: 50, beats: 5 },
+      { name: 'Cbat', tempo: 69, beatvolume: 69, beats: 6 }
+    ];
     console.log('Loading presets...');
 
     if (this.platformService.isBrowser()) {
