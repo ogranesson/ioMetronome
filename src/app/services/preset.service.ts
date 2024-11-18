@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { File } from '@awesome-cordova-plugins/file/ngx';
 import { Preset } from '../models/preset.model';
-import { firstValueFrom, from, Observable, Subject } from 'rxjs';
-import { PlatformService } from './platform.service';
+import { Observable, from, Subject } from 'rxjs';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 
 @Injectable({
   providedIn: 'root',
@@ -12,96 +12,146 @@ export class PresetService {
   selectedPreset = new Subject<Preset>();
   private persistentSelectedPreset!: Preset;
 
-  constructor(private file: File, private platformService: PlatformService) {}
+  constructor() {}
 
   async loadPresets(): Promise<Preset[]> {
-    if (!this.platformService.isCordova()) {
-      console.warn('Cordova is not available. Falling back to localStorage for presets.');
+    const defaultPresets: Preset[] = [{ name: 'Default', tempo: 120, beatvolume: 100, beats: 4 }];
+    console.log('Loading presets...');
+
+    if (Capacitor.getPlatform() === 'web') {
+      console.log('Web platform detected, using localStorage.');
       const data = localStorage.getItem(this.fileName);
-      return data ? JSON.parse(data) : [];
-    }
-
-    try {
-      const path = this.file.dataDirectory;
-      const exists = await this.file.checkFile(path, this.fileName);
-
-      if (exists) {
-        const content = await this.file.readAsText(path, this.fileName);
-        return JSON.parse(content) as Preset[];
+      if (data) {
+        console.log('Data found in localStorage:', data);
+        try {
+          return JSON.parse(data);
+        } catch (error) {
+          console.log('Error parsing data from localStorage:', error);
+          localStorage.setItem(this.fileName, JSON.stringify(defaultPresets));
+          return defaultPresets;
+        }
       } else {
-        const defaultPresets: Preset[] = [
-          { name: 'Default', tempo: 120, beatvolume: 100, beats: 4 },
-        ];
-        await this.file.writeFile(path, this.fileName, JSON.stringify(defaultPresets), { replace: true });
+        console.log('No data in localStorage, initializing with default presets.');
+        localStorage.setItem(this.fileName, JSON.stringify(defaultPresets));
         return defaultPresets;
       }
-    } catch (error) {
-      console.error('Error loading presets:', error);
-      return [];
+    } else {
+      try {
+        const result = await Filesystem.readFile({
+          path: this.fileName,
+          directory: Directory.Data,
+          encoding: Encoding.UTF8,
+        });
+
+        let content: string;
+
+        if (typeof result.data === 'string') {
+          content = result.data;
+        } else if (result.data instanceof Blob) {
+          content = await result.data.text();
+        } else {
+          throw new Error('Unexpected data type');
+        }
+
+        console.log('File content:', content);
+        try {
+          const presets = JSON.parse(content) as Preset[];
+          console.log('Parsed presets:', presets);
+          return presets;
+        } catch (error) {
+          console.log('Error parsing presets from file:', error);
+          await Filesystem.writeFile({
+            path: this.fileName,
+            data: JSON.stringify(defaultPresets),
+            directory: Directory.Data,
+            encoding: Encoding.UTF8,
+          });
+          return defaultPresets;
+        }
+      } catch (error) {
+        console.log('Error reading presets file:', error);
+        await Filesystem.writeFile({
+          path: this.fileName,
+          data: JSON.stringify(defaultPresets),
+          directory: Directory.Data,
+          encoding: Encoding.UTF8,
+        });
+        return defaultPresets;
+      }
     }
   }
 
   addPreset(newPreset: Preset): Observable<void> {
-    if (!this.platformService.isCordova()) {
-      console.warn('Cordova is not available. Adding preset to localStorage.');
-      const presets = JSON.parse(localStorage.getItem(this.fileName) || '[]') as Preset[];
+    console.log('Adding new preset:', newPreset);
+
+    if (Capacitor.getPlatform() === 'web') {
+      console.log('Web platform detected, adding preset to localStorage.');
+      const data = localStorage.getItem(this.fileName);
+      const presets = data ? JSON.parse(data) : [];
       presets.push(newPreset);
       localStorage.setItem(this.fileName, JSON.stringify(presets));
       return from(Promise.resolve());
+    } else {
+      return from(
+        this.loadPresets().then((presets) => {
+          presets.push(newPreset);
+          console.log('Updated presets:', presets);
+          return this.savePresets(presets).toPromise();
+        })
+      );
     }
-
-    return from(
-      this.loadPresets().then((presets) => {
-        presets.push(newPreset);
-        return firstValueFrom(this.savePresets(presets));
-      })
-    );
   }
 
   savePresets(presets: Preset[]): Observable<void> {
-    if (!this.platformService.isCordova()) {
-      console.warn('Cordova is not available. Saving presets to localStorage.');
+    console.log('Saving presets:', presets);
+
+    if (Capacitor.getPlatform() === 'web') {
+      console.log('Web platform detected, saving presets to localStorage.');
       localStorage.setItem(this.fileName, JSON.stringify(presets));
       return from(Promise.resolve());
+    } else {
+      return from(
+        Filesystem.writeFile({
+          path: this.fileName,
+          data: JSON.stringify(presets),
+          directory: Directory.Data,
+          encoding: Encoding.UTF8,
+        }).then(() => {
+          console.log('Presets saved to file:', this.fileName);
+        })
+      );
     }
-
-    const path = this.file.dataDirectory;
-
-    return from(
-      this.file.writeFile(path, this.fileName, JSON.stringify(presets), { replace: true })
-        .then(() => {
-          console.log('Presets saved successfully.');
-        })
-        .catch((err) => {
-          console.error('Error writing presets file:', err);
-          throw new Error('Failed to save presets');
-        })
-    );
   }
 
   deletePreset(presetName: string): Observable<void> {
-    if (!this.platformService.isCordova()) {
-      console.warn('Cordova is not available. Deleting preset from localStorage.');
-      const presets = JSON.parse(localStorage.getItem(this.fileName) || '[]') as Preset[];
-      const updatedPresets = presets.filter((p) => p.name !== presetName);
+    console.log('Deleting preset:', presetName);
+
+    if (Capacitor.getPlatform() === 'web') {
+      console.log('Web platform detected, deleting preset from localStorage.');
+      const data = localStorage.getItem(this.fileName);
+      const presets = data ? JSON.parse(data) : [];
+      const updatedPresets = presets.filter((p: { name: string }) => p.name !== presetName);
       localStorage.setItem(this.fileName, JSON.stringify(updatedPresets));
       return from(Promise.resolve());
+    } else {
+      return from(
+        this.loadPresets().then((presets) => {
+          const updatedPresets = presets.filter((p) => p.name !== presetName);
+          console.log('Updated presets after deletion:', updatedPresets);
+          return this.savePresets(updatedPresets).toPromise();
+        })
+      );
     }
-
-    return from(
-      this.loadPresets().then((presets) => {
-        const updatedPresets = presets.filter((p) => p.name !== presetName);
-        return firstValueFrom(this.savePresets(updatedPresets));
-      })
-    );
   }
 
   selectPreset(preset: Preset) {
+    console.log('Selecting preset:', preset);
     this.selectedPreset.next(preset);
     this.persistentSelectedPreset = preset;
   }
 
   getPreset(): Preset {
+    console.log('Getting selected preset:', this.persistentSelectedPreset);
     return this.persistentSelectedPreset;
   }
 }

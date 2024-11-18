@@ -88,5 +88,16 @@
   </ion-item>
 
   <ion-button (click)="pause()">{{buttonText}}</ion-button>
-  <ion-button (click)="addPreset()">{{buttonText}}</ion-button>
+  <ion-button id="present-alert">sds preset</ion-button>
+
+  <ion-alert
+  trigger="present-alert"
+  header="Add New Preset"
+  message="Enter a name for your new preset:"
+  [inputs]="[
+    { name: 'name', type: 'text', placeholder: 'Preset Name' }
+  ]"
+  [buttons]="alertButtons">
+</ion-alert>
+
 </ion-content>

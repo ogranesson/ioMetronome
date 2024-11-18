@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonRange, IonLabel, IonItem, IonList, IonButton } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonRange, IonLabel, IonItem, IonList, IonButton, IonAlert } from '@ionic/angular/standalone';
 import { ExploreContainerComponent } from '../explore-container/explore-container.component';
 import { AlertController } from '@ionic/angular';
 import { Preset } from '../models/preset.model';
@@ -16,7 +16,7 @@ import { PlatformService } from '../services/platform.service';
   templateUrl: 'metronome.page.html',
   styleUrls: ['metronome.page.scss'],
   standalone: true,
-  imports: [IonButton, IonList, IonItem, IonRange, IonHeader, IonToolbar, IonTitle, IonRange, IonLabel, IonContent, ExploreContainerComponent, FormsModule],
+  imports: [IonAlert, IonButton, IonList, IonItem, IonRange, IonHeader, IonToolbar, IonTitle, IonRange, IonLabel, IonContent, ExploreContainerComponent, FormsModule],
   providers: [NativeAudio]
 })
 export class MetronomePage {
@@ -33,11 +33,39 @@ export class MetronomePage {
   audio = new Audio('assets/beat.mp3');
   buttonText: string = "Play";
 
+  public alertButtons = [
+    {
+      text: 'Cancel',
+      role: 'cancel'
+    },
+    {
+      text: 'OK',
+      role: 'confirm',
+      handler: (data: { name: string }) => {
+        const newPreset: Preset = {
+          name: data.name,
+          tempo: this.tempo,
+          beatvolume: this.beatvolume,
+          beats: this.beats,
+        };
+
+        this.presetService.addPreset(newPreset).subscribe({
+          next: () => {
+            console.log('Preset added successfully');
+          },
+          error: (err) => {
+            console.error('Error adding preset:', err);
+          },
+        });
+      },
+    },
+  ];
+
   constructor(private router: Router,
               private alertController: AlertController,
               private presetService: PresetService,
               private nativeAudio: NativeAudio,
-              private platformService: PlatformService) {}
+              private platformService: PlatformService) { }
 
   ngOnInit() {
     if (this.platformService.isCordova()) {
@@ -131,56 +159,5 @@ export class MetronomePage {
       );
     }
   }
-
-  addPreset() {
-    const alert = this.alertController.create({
-      header: 'Add New Preset',
-      message: `
-        <div>
-          <strong>Current Values:</strong><br>
-          <ul>
-            <li>Tempo: ${this.tempo}</li>
-            <li>Volume: ${this.beatvolume}</li>
-            <li>Beats: ${this.beats}</li>
-          </ul>
-        </div>
-      `,
-      inputs: [
-        {
-          name: 'name',
-          type: 'text',
-          placeholder: 'Preset Name',
-        },
-      ],
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel',
-        },
-        {
-          text: 'OK',
-          handler: (data) => {
-            const newPreset: Preset = {
-              name: data.name,
-              tempo: this.tempo,
-              beatvolume: this.beatvolume,
-              beats: this.beats,
-            };
-  
-            this.presetService.addPreset(newPreset).subscribe({
-              next: () => {
-                console.log('Preset added successfully');
-              },
-              error: (err) => {
-                console.error('Error adding preset:', err);
-              },
-            });
-          },
-        },
-      ],
-    });
-  
-    alert.then((alertElement) => alertElement.present());
-  }  
 }
 
