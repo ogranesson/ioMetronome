@@ -3,6 +3,7 @@ import { Preset } from '../models/preset.model';
 import { Observable, from, Subject } from 'rxjs';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+import { PlatformService } from './platform.service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,13 +13,13 @@ export class PresetService {
   selectedPreset = new Subject<Preset>();
   private persistentSelectedPreset!: Preset;
 
-  constructor() {}
+  constructor(private platformService: PlatformService) {}
 
   async loadPresets(): Promise<Preset[]> {
     const defaultPresets: Preset[] = [{ name: 'Default', tempo: 120, beatvolume: 100, beats: 4 }];
     console.log('Loading presets...');
 
-    if (Capacitor.getPlatform() === 'web') {
+    if (this.platformService.isBrowser()) {
       console.log('Web platform detected, using localStorage.');
       const data = localStorage.getItem(this.fileName);
       if (data) {
@@ -84,7 +85,7 @@ export class PresetService {
   addPreset(newPreset: Preset): Observable<void> {
     console.log('Adding new preset:', newPreset);
 
-    if (Capacitor.getPlatform() === 'web') {
+    if (this.platformService.isBrowser()) {
       console.log('Web platform detected, adding preset to localStorage.');
       const data = localStorage.getItem(this.fileName);
       const presets = data ? JSON.parse(data) : [];
@@ -105,7 +106,7 @@ export class PresetService {
   savePresets(presets: Preset[]): Observable<void> {
     console.log('Saving presets:', presets);
 
-    if (Capacitor.getPlatform() === 'web') {
+    if (this.platformService.isBrowser()) {
       console.log('Web platform detected, saving presets to localStorage.');
       localStorage.setItem(this.fileName, JSON.stringify(presets));
       return from(Promise.resolve());
@@ -126,7 +127,7 @@ export class PresetService {
   deletePreset(presetName: string): Observable<void> {
     console.log('Deleting preset:', presetName);
 
-    if (Capacitor.getPlatform() === 'web') {
+    if (this.platformService.isBrowser()) {
       console.log('Web platform detected, deleting preset from localStorage.');
       const data = localStorage.getItem(this.fileName);
       const presets = data ? JSON.parse(data) : [];
